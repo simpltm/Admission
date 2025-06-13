@@ -72,4 +72,4 @@ python manage.py runserver
 
 ## Лицензия
 
-MIT 
+MIT
