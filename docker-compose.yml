@@ -3,15 +3,13 @@ version: '3.8'
 services:
   web:
     build: .
-    restart: always
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
     ports:
       - "8000:8000"
     environment:
-      - DEBUG=False
-      - DJANGO_SETTINGS_MODULE=university_admission.settings
-    volumes:
-      - static_volume:/app/static
-      - media_volume:/app/media
+      - DEBUG=1
 
 volumes:
   static_volume:
