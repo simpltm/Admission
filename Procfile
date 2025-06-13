@@ -1,0 +1,1 @@
+web: gunicorn university_admission.wsgi --log-file - 
