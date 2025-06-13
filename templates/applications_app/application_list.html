@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Список заявлений{% endblock %}
+
+{% block extra_head %}
+<style>
+  body, main, .application-bg {
+    background: #181c2f !important;
+    color: #fff !important;
+  }
+  .application-card, .card {
+    background: #23263a !important;
+    color: #fff !important;
+    border-radius: 18px;
+    box-shadow: 0 4px 24px 0 rgba(0,0,0,0.18);
+    border: 1.5px solid #23263a;
+  }
+  .card-header {
+    background: #23263a !important;
+    color: #b0b3c7 !important;
+    border: none;
+    font-weight: 600;
+    font-size: 1.15rem;
+  }
+  .table-dark {
+    --bs-table-bg: #23263a;
+    --bs-table-striped-bg: #23263a;
+    --bs-table-striped-color: #fff;
+    --bs-table-hover-bg: #282c3f;
+    --bs-table-hover-color: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .table-dark thead th {
+    color: #fff !important;
+    font-weight: 600;
+    background: #23263a !important;
+    border-bottom: 2px solid #393e5c;
+    letter-spacing: 0.03em;
+  }
+  .table-dark tbody tr:hover {
+    background: #282c3f !important;
+    color: #fff !important;
+  }
+  .btn-primary {
+    background: #6c63ff;
+    border: none;
+  }
+  .btn-primary:hover {
+    background: #5548c8;
+  }
+  .form-control, .form-select {
+    background: #23263a !important;
+    color: #fff !important;
+    border: 1px solid #393e5c;
+  }
+  .form-control:focus, .form-select:focus {
+    background: #23263a !important;
+    color: #fff !important;
+    border-color: #6c63ff;
+    box-shadow: 0 0 0 0.2rem rgba(108,99,255,0.15);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid application-bg py-4">
+    <div class="row mb-4">
+        <div class="col-lg-10 mx-auto">
+            <div class="card application-card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">Список заявлений</h5>
+                </div>
+                <div class="card-body">
+                    {% block application_list_table %}
+                    <div class="table-responsive">
+                        <table class="table table-dark table-striped align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>ФИО</th>
+                                    <th>Программа</th>
+                                    <th>Тип</th>
+                                    <th>Статус</th>
+                                    <th>Сумма баллов</th>
+                                    <th>Дата подачи</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for application in applications %}
+                                <tr>
+                                    <td>{{ application.get_full_name }}</td>
+                                    <td>{{ application.program.name }}</td>
+                                    <td>{{ application.get_enrollment_type_display }}</td>
+                                    <td>{{ application.get_status_display }}</td>
+                                    <td>{{ application.total_score }}</td>
+                                    <td>{{ application.created_at|date:"d.m.Y H:i" }}</td>
+                                    <td>
+                                        <a href="{% url 'applications:application_detail' application.pk %}" class="btn btn-sm btn-primary">Подробнее</a>
+                                        <a href="{% url 'applications:application_delete' application.pk %}" class="btn btn-sm btn-danger ms-2" onclick="return confirm('Вы уверены, что хотите удалить это заявление?');">
+                                            <i class="bi bi-trash"></i> Удалить
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr><td colspan="7">Нет заявлений</td></tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

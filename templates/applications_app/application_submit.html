@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Подтверждение подачи заявления{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Подтверждение подачи заявления</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <h6 class="alert-heading mb-3">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            Внимание!
+                        </h6>
+                        <p class="mb-0">
+                            После подачи заявления вы не сможете его редактировать. 
+                            Пожалуйста, проверьте все данные перед подтверждением.
+                        </p>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="card-title mb-0">Информация о заявлении</h6>
+                        </div>
+                        <div class="card-body">
+                            <dl class="row mb-0">
+                                <dt class="col-sm-4">ФИО:</dt>
+                                <dd class="col-sm-8">{{ application.get_full_name }}</dd>
+
+                                <dt class="col-sm-4">Направление:</dt>
+                                <dd class="col-sm-8">
+                                    {{ application.program.code }} - {{ application.program.name }}
+                                </dd>
+
+                                <dt class="col-sm-4">Тип приёма:</dt>
+                                <dd class="col-sm-8">
+                                    {% if application.enrollment_type == 'budget' %}
+                                    <span class="badge bg-success">Бюджет</span>
+                                    {% else %}
+                                    <span class="badge bg-info">Контракт</span>
+                                    {% endif %}
+                                </dd>
+
+                                <dt class="col-sm-4">Общий балл:</dt>
+                                <dd class="col-sm-8">{{ application.total_score }}</dd>
+
+                                <!-- <dt class="col-sm-4">Баллы по предметам:</dt> va unga bog'liq qismlar olib tashlandi -->
+                            </dl>
+                        </div>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="card-title mb-0">Загруженные документы</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group">
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between align-items-center">
+                                        <div>
+                                            <i class="bi bi-file-text me-2"></i>
+                                            Скан паспорта
+                                        </div>
+                                        <a href="{{ application.passport_scan.url }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                            Просмотреть
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between align-items-center">
+                                        <div>
+                                            <i class="bi bi-file-text me-2"></i>
+                                            Документ об образовании
+                                        </div>
+                                        <a href="{{ application.education_document.url }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                            Просмотреть
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="list-group-item">
+                                    <div class="d-flex w-100 justify-content-between align-items-center">
+                                        <div>
+                                            <i class="bi bi-image me-2"></i>
+                                            Фотография
+                                        </div>
+                                        <a href="{{ application.photo.url }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                            Просмотреть
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'applications:application_update' application.pk %}" class="btn btn-outline-secondary me-md-2">
+                                Вернуться к редактированию
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-send me-2"></i>
+                                Подтвердить подачу заявления
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

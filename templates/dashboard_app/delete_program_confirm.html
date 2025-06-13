@@ -1,0 +1,6 @@
+<form method="post" id="deleteProgramForm">
+    {% csrf_token %}
+    <p>Вы уверены, что хотите удалить направление <strong>{{ program.name }}</strong>?</p>
+    <button type="submit" class="btn btn-danger">Удалить</button>
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+</form> 

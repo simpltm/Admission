@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Заявление {{ application.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'applications:application_list' %}">Заявления</a></li>
+                    <li class="breadcrumb-item active">Просмотр заявления</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="col text-end">
+            <div class="btn-group">
+                {% if application.status in 'draft,rejected' %}
+                <a href="{% url 'applications:application_update' application.pk %}" class="btn btn-primary">
+                    <i class="bi bi-pencil"></i> Редактировать
+                </a>
+                {% endif %}
+                {% if application.status == 'draft' %}
+                <a href="{% url 'applications:application_submit' application.pk %}" class="btn btn-success">
+                    <i class="bi bi-send"></i> Подать заявление
+                </a>
+                {% endif %}
+                {% if application.status != 'draft' %}
+                {# PDF tugmasi olib tashlandi #}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Основная информация -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Основная информация</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <dl class="row">
+                                <dt class="col-sm-4">ФИО:</dt>
+                                <dd class="col-sm-8">{{ application.get_full_name }}</dd>
+
+                                <dt class="col-sm-4">Паспорт:</dt>
+                                <dd class="col-sm-8">{{ application.passport_id }}</dd>
+
+                                <dt class="col-sm-4">Дата рождения:</dt>
+                                <dd class="col-sm-8">{{ application.birth_date|date:"d.m.Y" }}</dd>
+
+                                <dt class="col-sm-4">Телефон:</dt>
+                                <dd class="col-sm-8">{{ application.phone }}</dd>
+
+                                <dt class="col-sm-4">Email:</dt>
+                                <dd class="col-sm-8">{{ application.email }}</dd>
+                            </dl>
+                        </div>
+                        <div class="col-md-6">
+                            <dl class="row">
+                                <dt class="col-sm-4">Направление:</dt>
+                                <dd class="col-sm-8">
+                                    {{ application.program.code }} - {{ application.program.name }}
+                                </dd>
+
+                                <dt class="col-sm-4">Тип приёма:</dt>
+                                <dd class="col-sm-8">
+                                    {% if application.enrollment_type == 'budget' %}
+                                    <span class="badge bg-success">Бюджет</span>
+                                    {% else %}
+                                    <span class="badge bg-info">Контракт</span>
+                                    {% endif %}
+                                </dd>
+
+                                <dt class="col-sm-4">Статус:</dt>
+                                <dd class="col-sm-8">
+                                    {% if application.status == 'draft' %}
+                                    <span class="badge bg-secondary">Черновик</span>
+                                    {% elif application.status == 'submitted' %}
+                                    <span class="badge bg-primary">Подано</span>
+                                    {% elif application.status == 'under_review' %}
+                                    <span class="badge bg-warning">На рассмотрении</span>
+                                    {% elif application.status == 'accepted' %}
+                                    <span class="badge bg-success">Принято</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">Отклонено</span>
+                                    {% endif %}
+                                </dd>
+
+                                <dt class="col-sm-4">Общий балл:</dt>
+                                <dd class="col-sm-8">
+                                    {% if application.total_score %}
+                                    {{ application.total_score }}
+                                    {% else %}
+                                    <span class="text-muted">—</span>
+                                    {% endif %}
+                                </dd>
+
+                                <dt class="col-sm-4">Дата подачи:</dt>
+                                <dd class="col-sm-8">
+                                    {% if application.submitted_at %}
+                                    {{ application.submitted_at|date:"d.m.Y H:i" }}
+                                    {% else %}
+                                    <span class="text-muted">—</span>
+                                    {% endif %}
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Баллы -->
+            <!-- <h5 class="card-title mb-0">Баллы по предметам</h5> va unga bog'liq qismlar olib tashlandi -->
+        </div>
+
+        <div class="col-md-4">
+            <!-- Документы -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Документы</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <a href="{{ application.passport_scan.url }}" class="list-group-item list-group-item-action" target="_blank">
+                            <i class="bi bi-file-text me-2"></i> Скан паспорта
+                        </a>
+                        <a href="{{ application.education_document.url }}" class="list-group-item list-group-item-action" target="_blank">
+                            <i class="bi bi-file-text me-2"></i> Документ об образовании
+                        </a>
+                        <a href="{{ application.photo.url }}" class="list-group-item list-group-item-action" target="_blank">
+                            <i class="bi bi-image me-2"></i> Фотография
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Информация о направлении -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Информация о направлении</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-12 mt-3">Описание:</dt>
+                        <dd class="col-sm-12">
+                            {{ application.selected_program.program.description|default:"Описание отсутствует" }}
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

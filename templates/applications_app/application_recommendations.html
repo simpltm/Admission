@@ -1,0 +1,351 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Рекомендуемые направления{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'applications:application_list' %}">Заявления</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'applications:application_detail' application.pk %}">{{ application.get_full_name }}</a></li>
+                    <li class="breadcrumb-item active">Рекомендуемые направления</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-3">
+            <!-- Фильтры -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-filter me-2"></i>
+                        Фильтры
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" id="filter-form">
+                        <div class="mb-3">
+                            <label class="form-label">Статус</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="status" value="suitable" 
+                                       id="suitable" {% if 'suitable' in request.GET.getlist('status') %}checked{% endif %}>
+                                <label class="form-check-label" for="suitable">
+                                    Подходит
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="status" value="unsuitable" 
+                                       id="unsuitable" {% if 'unsuitable' in request.GET.getlist('status') %}checked{% endif %}>
+                                <label class="form-check-label" for="unsuitable">
+                                    Не подходит
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="min_score" class="form-label">Минимальный балл</label>
+                            <input type="number" class="form-control" id="min_score" name="min_score" 
+                                   value="{{ request.GET.min_score }}" min="0" max="100">
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search me-2"></i>
+                                Применить фильтры
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Статистика -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>
+                        Статистика
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            Всего направлений
+                            <span class="badge bg-primary rounded-pill">{{ total_programs }}</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            Подходящих
+                            <span class="badge bg-success rounded-pill">{{ suitable_programs }}</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            Не подходящих
+                            <span class="badge bg-danger rounded-pill">{{ unsuitable_programs }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-9">
+            <!-- Рекомендации -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        Рекомендуемые направления
+                    </h5>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-outline-primary btn-sm" id="export-pdf">
+                            <i class="fas fa-file-pdf me-2"></i>
+                            Экспорт PDF
+                        </button>
+                        <button type="button" class="btn btn-outline-primary btn-sm" id="export-excel">
+                            <i class="fas fa-file-excel me-2"></i>
+                            Экспорт Excel
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if recommendations %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Направление</th>
+                                    <th>Код</th>
+                                    <th>Минимальный балл</th>
+                                    <th>Ваш балл</th>
+                                    <th>Статус</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for rec in recommendations %}
+                                <tr>
+                                    <td>
+                                        <a href="#" class="text-decoration-none" data-bs-toggle="modal" 
+                                           data-bs-target="#programModal{{ rec.program.pk }}">
+                                            {{ rec.program.name }}
+                                        </a>
+                                    </td>
+                                    <td>{{ rec.program.code }}</td>
+                                    <td>{{ rec.min_score }}</td>
+                                    <td>{{ rec.applicant_score }}</td>
+                                    <td>
+                                        {% if rec.is_suitable %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-check me-1"></i>
+                                            Подходит
+                                        </span>
+                                        {% else %}
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-times me-1"></i>
+                                            Не подходит
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-sm btn-outline-primary" 
+                                                    data-bs-toggle="modal" data-bs-target="#programModal{{ rec.program.pk }}">
+                                                <i class="fas fa-info-circle"></i>
+                                            </button>
+                                            {% if rec.is_suitable %}
+                                            <a href="{% url 'applications:application_update' application.pk %}?program={{ rec.program.pk }}" 
+                                               class="btn btn-sm btn-outline-success">
+                                                <i class="fas fa-check"></i>
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <!-- Модальное окно с деталями программы -->
+                                <div class="modal fade" id="programModal{{ rec.program.pk }}" tabindex="-1">
+                                    <div class="modal-dialog modal-lg">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">{{ rec.program.name }}</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <dl class="row">
+                                                            <dt class="col-sm-4">Код:</dt>
+                                                            <dd class="col-sm-8">{{ rec.program.code }}</dd>
+
+                                                            <dt class="col-sm-4">Факультет:</dt>
+                                                            <dd class="col-sm-8">{{ rec.program.faculty }}</dd>
+
+                                                            <dt class="col-sm-4">Срок обучения:</dt>
+                                                            <dd class="col-sm-8">{{ rec.program.duration }} лет</dd>
+                                                        </dl>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <dl class="row">
+                                                            <dt class="col-sm-4">Подано заявлений:</dt>
+                                                            <dd class="col-sm-8">{{ rec.program.current_applications }}</dd>
+                                                        </dl>
+                                                    </div>
+                                                </div>
+
+                                                <h6 class="mt-4">Требуемые предметы:</h6>
+                                                <div class="table-responsive">
+                                                    <table class="table table-sm">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Предмет</th>
+                                                                <th>Минимальный балл</th>
+                                                                <th>Ваш балл</th>
+                                                                <th>Статус</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {% for subject in rec.program.subjects.all %}
+                                                            <tr>
+                                                                <td>{{ subject.name }}</td>
+                                                                <td>
+                                                                    {% with min_score=subject.programsubject_set.get.min_score %}
+                                                                    {{ min_score }}
+                                                                    {% endwith %}
+                                                                </td>
+                                                                <td>
+                                                                    {% with score=application.get_subject_score subject %}
+                                                                    {{ score|default:"—" }}
+                                                                    {% endwith %}
+                                                                </td>
+                                                                <td>
+                                                                    {% with score=application.get_subject_score subject %}
+                                                                    {% with min_score=subject.programsubject_set.get.min_score %}
+                                                                    {% if score >= min_score %}
+                                                                    <span class="badge bg-success">Проходной</span>
+                                                                    {% else %}
+                                                                    <span class="badge bg-danger">Не проходной</span>
+                                                                    {% endif %}
+                                                                    {% endwith %}
+                                                                    {% endwith %}
+                                                                </td>
+                                                            </tr>
+                                                            {% endfor %}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                                <div class="mt-3">
+                                                    <h6>Описание:</h6>
+                                                    <p>{{ rec.program.description|default:"Описание отсутствует" }}</p>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                {% if rec.is_suitable %}
+                                                <a href="{% url 'applications:application_update' application.pk %}?program={{ rec.program.pk }}" 
+                                                   class="btn btn-success">
+                                                    <i class="fas fa-check me-2"></i>
+                                                    Выбрать направление
+                                                </a>
+                                                {% endif %}
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Пагинация -->
+                    {% if is_paginated %}
+                    <nav aria-label="Навигация по страницам" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">
+                                    <i class="fas fa-angle-left"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+
+                            {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">
+                                    {{ num }}
+                                </a>
+                            </li>
+                            {% endif %}
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">
+                                    <i class="fas fa-angle-right"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.urlencode %}&{{ request.GET.urlencode }}{% endif %}">
+                                    <i class="fas fa-angle-double-right"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+
+                    {% else %}
+                    <div class="alert alert-warning mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        По текущим критериям не найдено подходящих направлений.
+                        Попробуйте изменить параметры фильтрации или улучшить результаты по предметам.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Обработка экспорта PDF
+    document.getElementById('export-pdf').addEventListener('click', function() {
+        window.location.href = "{% url 'applications:application_recommendations_pdf' application.pk %}";
+    });
+
+    // Обработка экспорта Excel
+    document.getElementById('export-excel').addEventListener('click', function() {
+        window.location.href = "{% url 'applications:application_recommendations_excel' application.pk %}";
+    });
+
+    // Автоматическая отправка формы при изменении фильтров
+    const filterInputs = document.querySelectorAll('#filter-form input');
+    filterInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            document.getElementById('filter-form').submit();
+        });
+    });
+});
+</script>
+{% endblock %} 

@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Панель управления{% endblock %}
+
+{% block extra_head %}
+<style>
+  body, main, .dashboard-bg {
+    background: #181c2f !important;
+    color: #fff !important;
+  }
+  .dashboard-card, .card, .table-dark {
+    background: #23263a !important;
+    color: #fff !important;
+    border-radius: 18px;
+    box-shadow: 0 2px 8px #0002;
+  }
+  .card-header, .table-dark thead th {
+    background: #23263a !important;
+    color: #b0b3c7 !important;
+    border: none;
+  }
+  .form-control, .form-select {
+    background: #23263a !important;
+    color: #fff !important;
+    border: 1px solid #393e5c;
+  }
+  .form-control:focus, .form-select:focus {
+    background: #23263a !important;
+    color: #fff !important;
+    border-color: #6c63ff;
+    box-shadow: 0 0 0 0.2rem rgba(108,99,255,0.15);
+  }
+  .btn-primary {
+    background: #6c63ff;
+    border: none;
+  }
+  .btn-primary:hover {
+    background: #5548c8;
+  }
+  .table-dark {
+    --bs-table-bg: #23263a;
+    --bs-table-striped-bg: #23263a;
+    --bs-table-striped-color: #fff;
+    --bs-table-hover-bg: #23263a;
+    --bs-table-hover-color: #fff;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid dashboard-bg py-4">
+    <div class="row mb-4">
+        <div class="col-md-6 mb-4">
+            <div class="card dashboard-card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">Добавить новое направление</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form.name|as_crispy_field }}
+                        {{ form.code|as_crispy_field }}
+                        {{ form.description|as_crispy_field }}
+                        {{ form.education_form|as_crispy_field }}
+                        <button type="submit" class="btn btn-primary mt-2">Добавить</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card dashboard-card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Список направлений</h5>
+                    <form method="get" class="d-flex align-items-center mb-0">
+                        <select name="education_form" class="form-select me-2" style="min-width:220px">
+                            <option value="">Все формы обучения</option>
+                            {% for value, label in education_form_choices %}
+                                <option value="{{ value }}" {% if value == education_form_filter %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-outline-light">Фильтр</button>
+                    </form>
+                </div>
+                <div class="card-body">
+                    <div class="dashboard-table-bg p-3 mb-0">
+                        <table class="table table-dark table-striped align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Код</th>
+                                    <th>Название</th>
+                                    <th>Форма обучения</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for program in programs %}
+                                <tr>
+                                    <td>{{ program.code }}</td>
+                                    <td>{{ program.name }}</td>
+                                    <td>{{ program.get_education_form_display }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr><td colspan="5">Нет направлений</td></tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

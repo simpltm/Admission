@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Удаление заявления{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Подтверждение удаления заявления</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger">
+                        <h6 class="alert-heading mb-3">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            Внимание!
+                        </h6>
+                        <p class="mb-0">
+                            Вы собираетесь удалить заявление. Это действие нельзя отменить.
+                            Все данные заявления, включая загруженные документы, будут удалены безвозвратно.
+                        </p>
+                    </div>
+
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="card-title mb-0">Информация о заявлении</h6>
+                        </div>
+                        <div class="card-body">
+                            <dl class="row mb-0">
+                                <dt class="col-sm-4">ФИО:</dt>
+                                <dd class="col-sm-8">{{ object.get_full_name }}</dd>
+
+                                <dt class="col-sm-4">Направление:</dt>
+                                <dd class="col-sm-8">
+                                    {{ object.program.code }} - {{ object.program.name }}
+                                </dd>
+
+                                <dt class="col-sm-4">Статус:</dt>
+                                <dd class="col-sm-8">
+                                    {% if object.status == 'draft' %}
+                                    <span class="badge bg-secondary">Черновик</span>
+                                    {% elif object.status == 'submitted' %}
+                                    <span class="badge bg-primary">Подано</span>
+                                    {% elif object.status == 'under_review' %}
+                                    <span class="badge bg-warning">На рассмотрении</span>
+                                    {% elif object.status == 'accepted' %}
+                                    <span class="badge bg-success">Принято</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">Отклонено</span>
+                                    {% endif %}
+                                </dd>
+
+                                <dt class="col-sm-4">Дата создания:</dt>
+                                <dd class="col-sm-8">{{ object.created_at|date:"d.m.Y H:i" }}</dd>
+
+                                {% if object.submitted_at %}
+                                <dt class="col-sm-4">Дата подачи:</dt>
+                                <dd class="col-sm-8">{{ object.submitted_at|date:"d.m.Y H:i" }}</dd>
+                                {% endif %}
+                            </dl>
+                        </div>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'applications:application_detail' object.pk %}" class="btn btn-outline-secondary me-md-2">
+                                Отмена
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash me-2"></i>
+                                Удалить заявление
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
