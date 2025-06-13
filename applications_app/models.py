@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from programs_app.models import StudyProgram, Subject, EDUCATION_FORM_CHOICES
+from django.apps import AppConfig
 
 class ProgramPreference(models.Model):
     """Модель для предпочтений по направлениям подготовки"""
@@ -146,6 +147,17 @@ class ApplicationPhoto(models.Model):
 
     def __str__(self):
         return f"{self.application} - {self.image.name}"
+
+class ApplicationsConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'applications_app'
+
+    def ready(self):
+        from .models import Subject
+        try:
+            Subject.objects.get_or_create(name='Русский язык')
+        except Exception:
+            pass
 
 # Subject.objects.get_or_create(name='Русский язык')
 # Subject.objects.get_or_create(name='Химия')

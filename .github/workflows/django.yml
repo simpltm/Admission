@@ -26,10 +26,10 @@ jobs:
           --health-retries 5
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.11'
         
@@ -40,18 +40,18 @@ jobs:
         
     - name: Run migrations
       env:
-        DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
+        DATABASE_URL: postgres://test_user:test_password@localhost:5432/test_db
         SECRET_KEY: test_secret_key
-        DEBUG: True
+        DEBUG: "True"
       run: |
         python manage.py makemigrations
         python manage.py migrate
         
     - name: Run tests
       env:
-        DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
+        DATABASE_URL: postgres://test_user:test_password@localhost:5432/test_db
         SECRET_KEY: test_secret_key
-        DEBUG: True
+        DEBUG: "True"
       run: |
         python manage.py test
         
@@ -67,7 +67,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
@@ -84,6 +84,7 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
           cd /home/ubuntu/university-admission
-          git pull origin main
+          git pull
           docker-compose down
-          docker-compose up --build -d 
+          docker-compose up -d --build
+        command_timeout: 20m 
