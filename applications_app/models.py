@@ -147,7 +147,7 @@ class ApplicationPhoto(models.Model):
     def __str__(self):
         return f"{self.application} - {self.image.name}"
 
-Subject.objects.get_or_create(name='Русский язык')
-Subject.objects.get_or_create(name='Химия')
+# Subject.objects.get_or_create(name='Русский язык')
+# Subject.objects.get_or_create(name='Химия')
 
-print(list(Subject.objects.values_list('name', flat=True)))
+# print(list(Subject.objects.values_list('name', flat=True)))
