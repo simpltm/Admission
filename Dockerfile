@@ -25,5 +25,5 @@ RUN python manage.py collectstatic --noinput
 # Port
 EXPOSE 8000
 
-# Gunicorn orqali ishga tushirish
-CMD ["gunicorn", "university_admission.wsgi:application", "--bind", "0.0.0.0:8000"]
+# Gunicorn o‘rniga runserver
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
