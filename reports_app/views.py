@@ -199,11 +199,13 @@ def download_applicant_excel(request, applicant_id):
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
         df.to_excel(writer, sheet_name='Данные абитуриента', index=False)
     output.seek(0)
+    # Fayl nomini abiturientning to'liq ismi bilan o'zgartirish
+    full_name = f"{applicant.last_name}_{applicant.first_name}_{applicant.middle_name}".replace(' ', '_')
     response = HttpResponse(
         output.read(),
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
-    response['Content-Disposition'] = f'attachment; filename=applicant_{applicant_id}.xlsx'
+    response['Content-Disposition'] = f'attachment; filename={full_name}.xlsx'
     return response
 
 @login_required
@@ -233,8 +235,9 @@ def download_applicant_pdf(request, applicant_id):
                 p.showPage()
     p.save()
     buffer.seek(0)
+    full_name = f"{applicant.last_name}_{applicant.first_name}_{applicant.middle_name}".replace(' ', '_')
     response = HttpResponse(buffer.read(), content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename=applicant_{applicant_id}_all_images.pdf'
+    response['Content-Disposition'] = f'attachment; filename={full_name}_all_images.pdf'
     return response
 
 @login_required
@@ -272,6 +275,7 @@ def download_zip(request, applicant_id):
         if applicant.notarized_passport_scan and applicant.notarized_passport_scan.path:
             zip_file.write(applicant.notarized_passport_scan.path, arcname='notarial_tarjima' + applicant.notarized_passport_scan.name[-4:])
     buffer.seek(0)
+    full_name = f"{applicant.last_name}_{applicant.first_name}_{applicant.middle_name}".replace(' ', '_')
     response = HttpResponse(buffer.read(), content_type='application/zip')
-    response['Content-Disposition'] = f'attachment; filename=applicant_{applicant_id}_files.zip'
+    response['Content-Disposition'] = f'attachment; filename={full_name}_files.zip'
     return response
