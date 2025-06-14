@@ -53,7 +53,6 @@
         <table class="table table-bordered table-hover align-middle reports-table">
             <thead class="table-light">
                 <tr>
-                    <th>Фото</th>
                     <th>ФИО</th>
                     <th>Файлы</th>
                 </tr>
@@ -61,15 +60,6 @@
             <tbody>
                 {% for application in applications %}
                 <tr>
-                    <td style="width: 80px;">
-                        {% if application.photo %}
-                            <a href="{% url 'reports_app:download_excel' application.id %}">
-                                <img src="{{ application.photo.url }}" alt="Фото" class="img-thumbnail" style="max-width: 70px; max-height: 70px; cursor:pointer;">
-                            </a>
-                        {% else %}
-                            <a href="{% url 'reports_app:download_excel' application.id %}" class="text-muted">—</a>
-                        {% endif %}
-                    </td>
                     <td>{{ application.last_name }} {{ application.first_name }} {{ application.middle_name }}</td>
                     <td>
                         {% if application.passport_scan %}
