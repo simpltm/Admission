@@ -6,6 +6,5 @@ __pycache__
 .DS_Store
 venv/
 .venv/
-media/
 static/
 db.sqlite3 
