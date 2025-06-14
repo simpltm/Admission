@@ -280,7 +280,7 @@ def download_zip(request, applicant_id):
     buffer.seek(0)
     timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     full_name = f"{applicant.last_name}_{applicant.first_name}_{applicant.middle_name}".replace(' ', '_')
-    filename = f"{full_name}_{timestamp}_files.zip"
+    filename = f"{full_name}_{timestamp}.zip"
     response = HttpResponse(buffer.read(), content_type='application/zip')
     response['Content-Disposition'] = f'attachment; filename={filename}'
     return response
