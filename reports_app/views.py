@@ -6,7 +6,7 @@ from django.db.models import Count, Q
 from applications_app.models import Application, SubjectScore, ProgramPreference, ApplicationPhoto
 from programs_app.models import StudyProgram
 from django.utils import timezone
-from datetime import timedelta
+from datetime import timedelta, datetime
 from django.http import HttpResponse, FileResponse
 import pandas as pd
 from reportlab.pdfgen import canvas
@@ -199,13 +199,14 @@ def download_applicant_excel(request, applicant_id):
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
         df.to_excel(writer, sheet_name='Данные абитуриента', index=False)
     output.seek(0)
-    # Fayl nomini abiturientning to'liq ismi bilan o'zgartirish
+    timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     full_name = f"{applicant.last_name}_{applicant.first_name}_{applicant.middle_name}".replace(' ', '_')
+    filename = f"{full_name}_{timestamp}.xlsx"
     response = HttpResponse(
         output.read(),
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
-    response['Content-Disposition'] = f'attachment; filename={full_name}.xlsx'
+    response['Content-Disposition'] = f'attachment; filename={filename}'
     return response
 
 @login_required
@@ -235,9 +236,11 @@ def download_applicant_pdf(request, applicant_id):
                 p.showPage()
     p.save()
     buffer.seek(0)
+    timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     full_name = f"{applicant.last_name}_{applicant.first_name}_{applicant.middle_name}".replace(' ', '_')
+    filename = f"{full_name}_{timestamp}_all_images.pdf"
     response = HttpResponse(buffer.read(), content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename={full_name}_all_images.pdf'
+    response['Content-Disposition'] = f'attachment; filename={filename}'
     return response
 
 @login_required
@@ -275,7 +278,9 @@ def download_zip(request, applicant_id):
         if applicant.notarized_passport_scan and applicant.notarized_passport_scan.path:
             zip_file.write(applicant.notarized_passport_scan.path, arcname='notarial_tarjima' + applicant.notarized_passport_scan.name[-4:])
     buffer.seek(0)
+    timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     full_name = f"{applicant.last_name}_{applicant.first_name}_{applicant.middle_name}".replace(' ', '_')
+    filename = f"{full_name}_{timestamp}_files.zip"
     response = HttpResponse(buffer.read(), content_type='application/zip')
-    response['Content-Disposition'] = f'attachment; filename={full_name}_files.zip'
+    response['Content-Disposition'] = f'attachment; filename={filename}'
     return response
